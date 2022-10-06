@@ -181,6 +181,10 @@ func (t *Trace) trace(iName, fName string, indent int, args []interface{}, rets 
 			}
 		}
 	}
+
+	t.c.tl.Lock()
+	defer t.c.tl.Unlock()
+	
 	if t.c.t[callID] == nil {
 		t.c.t[callID] = map[string]map[string][]string{}
 	}
