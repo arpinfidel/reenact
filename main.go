@@ -113,11 +113,9 @@ type TContext struct {
 	context.Context
 }
 
-func (ctx TContext) PrintTrace() {
-	(*ctx.Value(TraceFuncKey).(*func()))()
-}
+type PrintTraceFunc func()
 
-func WithTraceContext(ctx context.Context) TContext {
+func WithTraceContext(ctx context.Context) (PrintTraceFunc, TContext) {
 	uuid := uuid.NewV4().String()
 	ctx = context.WithValue(ctx, TraceIDKey, uuid)
 
@@ -129,9 +127,11 @@ func WithTraceContext(ctx context.Context) TContext {
 	cName := cDet.Name()
 	ctx = context.WithValue(ctx, TraceCallerKey, cName)
 
-	return TContext{
-		Context: ctx,
-	}
+	return func() {
+			(*ctx.Value(TraceFuncKey).(*func()))()
+		}, TContext{
+			Context: ctx,
+		}
 }
 
 func (t *Trace) trace(iName, fName string, indent int, args []interface{}, rets []interface{}) {
